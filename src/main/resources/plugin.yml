@@ -1,0 +1,61 @@
+name: PlayerMessages
+version: '1.0-SNAPSHOT'
+main: com.github.str3ets.playerMessages.PlayerMessages
+api-version: '1.21'
+authors: [ str3ets_ ]
+description: A plugin that handles player join/leave messages & personal message thru /message <playername> <text> or /reply <text>
+
+commands:
+  pmreload:
+    description: Reload de PlayerMessages config
+    usage: /pmreload
+    permission: playermessages.reload
+  pmscreen:
+    description: Broadcast een title/subtitle in ieders scherm
+    usage: /pmscreen <text...> <seconds> | /pmscreen <title...> | <subtitle...> <seconds> | /pmscreen clear
+    permission: playermessages.screen
+  pm:
+    description: Stuur een private message naar een speler
+    usage: /pm <player> <message...>
+    permission: playermessages.pm
+  pmclearchat:
+    description: Clear de chat voor iedereen
+    usage: /pmclearchat
+    permission: playermessages.clearchat
+  report:
+    description: Report a player
+    usage: /report <player>
+    permission: playermessages.report
+  reports:
+    description: View and handle player reports
+    usage: /reports
+    permission: playermessages.reports
+
+permissions:
+  playermessages.reload:
+    description: Mag /pmreload gebruiken
+    default: op
+  playermessages.screen:
+    description: Mag /pmscreen gebruiken
+    default: op
+  playermessages.pm:
+    description: Mag /pm gebruiken
+    default: true
+  playermessages.clearchat:
+    description: Mag de chat clearen
+    default: op
+  playermessages.report:
+    description: Mag /report gebruiken
+    default: true
+  playermessages.reports:
+    description: Mag /reports gebruiken
+    default: op
+  playermessages.reports.tp:
+    description: Mag teleport opties gebruiken
+    default: op
+  playermessages.reports.kick:
+    description: Mag kick gebruiken
+    default: op
+  playermessages.reports.ban:
+    description: Mag ban gebruiken
+    default: op

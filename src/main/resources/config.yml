@@ -1,0 +1,292 @@
+# =========================
+# PlayerMessages - config.yml
+# =========================
+
+messages:
+  prefix: "&8[&6✦&8] "
+  no-permission: "{prefix}&cNo permission."
+  player-only: "{prefix}&cOnly players can use this."
+  player-offline: "{prefix}&cThat player is not online."
+
+# -------------------------
+# Join / Leave
+# -------------------------
+join-message: "&8[&a+&8] &a{player} joined the server."
+leave-message: "&8[&c-&8] &c{player} left the server."
+
+first-join:
+  enabled: true
+  sound: "UI_TOAST_CHALLENGE_COMPLETE"
+  volume: 1.0
+  pitch: 1.0
+  lines:
+    - ""
+    - "&6&l⛏ NEW TYCOON &8» &f{player}"
+    - "&7Welcome to &e&lCryptocoon&7 — start your grind and build your empire."
+    - "&aTip: &7Type &f/tutorial &7to claim your starter setup."
+    - ""
+
+# -------------------------
+# Chat format
+# -------------------------
+chat:
+  enabled: true
+  format: "&8[&6✦&8] &f{player} &8» &7{message}"
+
+# -------------------------
+# /pm
+# -------------------------
+pm:
+  messages:
+    usage: "{prefix}&7Usage: &f/pm <player> <message...>"
+    self: "{prefix}&cYou can’t message yourself."
+    target-offline: "{prefix}&cThat player is not online."
+
+  sender-format: "&8[&d✉&8] &7To &f{to} &8» &7{message}"
+  receiver-format: "&8[&d✉&8] &7From &f{from} &8» &7{message}"
+
+  clickable:
+    enabled: true
+    suggest-command: "/pm {from} "
+    hover: "&dClick to reply"
+
+  sound:
+    enabled: true
+    name: "BLOCK_NOTE_BLOCK_PLING"
+    volume: 1.0
+    pitch: 1.2
+
+# -------------------------
+# /pmreload
+# -------------------------
+pmreload:
+  messages:
+    done: "{prefix}&aConfig reloaded."
+    usage: "{prefix}&7Usage: &f/pmreload"
+  sound:
+    enabled: true
+    name: "UI_BUTTON_CLICK"
+    volume: 1.0
+    pitch: 1.0
+
+# -------------------------
+# /pmclearchat
+# -------------------------
+clearchat:
+  lines: 150
+  messages:
+    usage: "{prefix}&7Usage: &f/pmclearchat"
+    done-message: "&8[&6✦&8] &eChat cleared by &f{by}&e."
+  sound:
+    enabled: true
+    name: "UI_BUTTON_CLICK"
+    volume: 1.0
+    pitch: 1.0
+
+# -------------------------
+# /pmscreen
+# -------------------------
+screen:
+  fade-in: 10
+  fade-out: 10
+
+  command:
+    usage: "{prefix}&7Usage: &f/pmscreen <message...> <durationSeconds>"
+    invalid-duration: "{prefix}&cInvalid duration. Example: &f3.5"
+    sent: "{prefix}&aScreen message sent &7({duration}s)&a."
+
+  broadcast:
+    title-format: "&6{message}"
+    subtitle-format: ""
+
+  sound:
+    enabled: true
+    name: "BLOCK_NOTE_BLOCK_PLING"
+    volume: 1.0
+    pitch: 1.2
+
+# =========================
+# REPORT SYSTEM
+# =========================
+report:
+  messages:
+    usage: "{prefix}&7Usage: &f/report <player>"
+    self: "{prefix}&cYou can’t report yourself."
+    target-offline: "{prefix}&cThat player is no longer online."
+    selected: "{prefix}&eYou reported &f{target} &efor &d{reason}&e."
+    prompt: "{prefix}&7Type details in chat. Type &c'cancel' &7to cancel."
+    cancelled: "{prefix}&cReport cancelled."
+    too-short: "{prefix}&cPlease give a bit more detail (or type 'cancel')."
+    submitted: "{prefix}&aReport submitted. Thanks!"
+    min-details-length: 3
+
+  gui:
+    size: 27
+    title: "&4You're reporting: &c{target}"
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      name: " "
+    options:
+      cheating:
+        slot: 10
+        material: DIAMOND_SWORD
+        name: "&6Cheating"
+        lore:
+          - "&7Hacks, autoclicker, xray, etc."
+        reason: "Cheating"
+      griefing:
+        slot: 11
+        material: TNT
+        name: "&6Griefing"
+        lore:
+          - "&7Destroying farms, stealing, sabotaging."
+        reason: "Griefing"
+      harassment:
+        slot: 12
+        material: PAPER
+        name: "&6Harassment"
+        lore:
+          - "&7Insults, spam, toxic behavior."
+        reason: "Harassment"
+      unsportive:
+        slot: 13
+        material: BARRIER
+        name: "&6Unsportive"
+        lore:
+          - "&7Scamming, trolling, unfair play."
+        reason: "Unsportive"
+      other:
+        slot: 16
+        material: BOOK
+        name: "&6Other"
+        lore:
+          - "&7Something else. Explain in detail."
+        reason: "Other"
+
+  admin-notify:
+    enabled: true
+    permission: "playermessages.reports"
+    message: "&8[&c!&8] &c&lNew report &8» &f{reporter} reported {target} for &e{reason}"
+    sound:
+      enabled: true
+      name: "ENTITY_VILLAGER_NO"
+      volume: 1.0
+      pitch: 1.0
+
+# =========================
+# /REPORTS ADMIN GUI
+# =========================
+reports:
+  click-sound:
+    enabled: true
+    name: "ITEM_BOOK_PAGE_TURN"
+    volume: 1.0
+    pitch: 1.0
+
+  command:
+    player-only: "{prefix}&cOnly players can use this."
+    opened: "{prefix}&aOpened reports."
+
+  gui:
+    list:
+      size: 27
+      title: "&cReports &8(Page {page}/{max_page})"
+      filler:
+        material: GRAY_STAINED_GLASS_PANE
+        name: " "
+      details-max: 40
+      status:
+        open: "&aOpen"
+        handled: "&cHandled"
+      item:
+        open-material: PAPER
+        handled-material: GRAY_DYE
+        name: "&c{target}"
+        lore:
+          - "&7Reporter: &f{reporter}"
+          - "&7Reason: &e{reason}"
+          - "&7Details: &f{details_short}"
+          - "&7Status: {status}"
+          - "&7By: &f{handled_by}"
+      controls:
+        prev:
+          slot: 18
+          material: ARROW
+          name: "&7Prev"
+        close:
+          slot: 22
+          material: BARRIER
+          name: "&cClose"
+        next:
+          slot: 26
+          material: ARROW
+          name: "&7Next"
+
+    detail:
+      size: 36
+      title: "&8Report of &c{target}"
+      filler:
+        material: GRAY_STAINED_GLASS_PANE
+        name: " "
+      info:
+        slot: 13
+        material: BOOK
+        name: "&cReport info"
+        lore:
+          - "&7Reporter: &f{reporter}"
+          - "&7Suspect: &f{target}"
+          - "&7Reason: &6{reason}"
+          - "&7Details: &f{details}"
+          - "&7Status: {status}"
+      buttons:
+        tp-reporter:
+          slot: 10
+          material: ENDER_PEARL
+          name: "&bTeleport to Reporter"
+          lore:
+            - "&f{reporter}"
+        tp-reported:
+          slot: 11
+          material: ENDER_PEARL
+          name: "&bTeleport to Suspect"
+          lore:
+            - "&f{target}"
+        ban:
+          slot: 15
+          material: REDSTONE_BLOCK
+          name: "&cBan the Suspect"
+          lore:
+            - "&7Click then type duration + reason"
+        kick:
+          slot: 16
+          material: TOTEM_OF_UNDYING
+          name: "&eKick the Suspect"
+          lore:
+            - "&7Click then type reason"
+      controls:
+        back:
+          slot: 27
+          material: ARROW
+          name: "&7Back"
+        close:
+          slot: 35
+          material: BARRIER
+          name: "&cClose"
+
+  actions:
+    cancel-word: "cancel"
+    cancelled: "{prefix}&cAction cancelled."
+
+    kick:
+      prompt: "{prefix}&eKick &f{target}&e. Type a reason in chat. (&ccancel&e)"
+      done: "{prefix}&aKick handled for &f{target}&a."
+
+    ban:
+      prompt-duration: "{prefix}&eBan &f{target}&e. Type duration: &f10m, 2h, 3d, 1w, perm&e. (&ccancel&e)"
+      invalid-duration: "{prefix}&cInvalid duration. Use &f10m,2h,3d,1w,perm&c."
+      prompt-reason: "{prefix}&eNow type the ban reason. (&ccancel&e)"
+      done: "{prefix}&aBan handled for &f{target}&a."
+
+  punish:
+    kick-message: "&cKicked: &f{reason}"
+    ban-kick-message: "&cBanned: &f{reason}"
