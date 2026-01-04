@@ -290,3 +290,187 @@ reports:
   punish:
     kick-message: "&cKicked: &f{reason}"
     ban-kick-message: "&cBanned: &f{reason}"
+
+# =========================
+# TRADE SYSTEM
+# =========================
+trade:
+  request:
+    expire-seconds: 60
+    clickable:
+      enabled: true
+      message: "{prefix}&e{player}&7 sent you a trade request "
+      accept:
+        text: "&a[Accept]"
+        hover: "&aClick to accept"
+        command: "/trade accept"
+      deny:
+        text: "&c[Deny]"
+        hover: "&cClick to deny"
+        command: "/trade deny"
+    sound:
+      enabled: true
+      name: "BLOCK_NOTE_BLOCK_PLING"
+      volume: 1.0
+      pitch: 1.2
+
+  sounds:
+    cancel:
+      enabled: true
+      name: "ENTITY_VILLAGER_NO"
+      volume: 1.0
+      pitch: 1.2
+    complete:
+      enabled: true
+      name: "BLOCK_NOTE_BLOCK_PLING"
+      volume: 1.0
+      pitch: 1.2
+  countdown:
+    sound:
+      enabled: true
+      name: "UI_BUTTON_CLICK"
+      volume: 1.0
+      pitch: 1.2
+
+  messages:
+    usage: "{prefix}&7Usage: &f/trade <player> &7| &f/trade accept &7| &f/trade deny &7| &f/trade cancel"
+    self: "{prefix}&cYou can’t trade with yourself."
+    busy: "{prefix}&cOne of you is already in a trade."
+    already-requested: "{prefix}&cYou already have an outgoing trade request. Use &f/trade cancel&c."
+    target-has-request: "{prefix}&cThat player already has a pending request."
+    target-offline: "{prefix}&cThat player is not online."
+    request-sent: "{prefix}&aTrade request sent to &e{target}&a."
+    request-received: "{prefix}&e{player}&a wants to trade. Type &e/trade accept &aor &c/trade deny&a."
+    request-expired: "{prefix}&cThat trade request expired."
+    denied: "{prefix}&cYour trade request was denied."
+    cancelled: "{prefix}&cTrade cancelled."
+    cancelled-closed: "{prefix}&cTrade cancelled (GUI closed)."
+    completed: "{prefix}&aTrade completed."
+    no-space: "{prefix}&cNo space left in your trade slots."
+    not-your-accept: "{prefix}&cThat is not your accept button."
+
+  gui:
+    title: "&8Trading..."
+    cancel-name: "&cCancel trade"
+    accepted: "&aAccepted: &f{player}"
+    not-accepted: "&cNot accepted: &f{player}"
+    status-waiting: "&7Waiting for accept..."
+    status-countdown: "&aTrading in &e{seconds}&a..."
+
+# =========================
+# CRYPTOCOON SYSTEM
+# =========================
+cryptocoon:
+  coins:
+    name: "CC"
+    start-balance: 0
+
+  tycoon:
+    world: "cryptocoon_tycoon"
+
+    origin-x: 0
+    origin-z: 0
+
+    plot-size: 512      # ✅ groot bouwgebied per speler
+    gap: 49488          # ✅ 512 + 49488 = 50.000 blocks tussen plots
+    row-length: 10
+
+    island:
+      base-size: 30       # ✅ starter eiland = 30x30
+      upgrade-step: 10    # 40, 50, 60...
+      max-size: 150       # cap
+      y: 100
+      dirt-layers: 2
+      spawn-offset-y: 2
+
+    upgrades:
+      enabled: true
+      message: "{prefix}&aTycoon upgraded! &7New island size: &e{size}x{size}"
+      maxed: "{prefix}&eYour tycoon is already max level."
+
+    teleport-on-join: false
+
+    messages:
+      claimed: "{prefix}&aTycoon claimed! &7Use &f/tycoon &7to teleport."
+      not-in-plot: "{prefix}&cYou can only place miners inside your tycoon."
+      tp: "{prefix}&aTeleported to your tycoon."
+      info: "{prefix}&7Your tycoon: &fX {minx}-{maxx} &7| &fZ {minz}-{maxz}"
+      reset: "{prefix}&aYour island was regenerated."
+
+    sounds:
+      deny:
+        enabled: true
+        name: "ENTITY_VILLAGER_NO"
+        volume: 1.0
+        pitch: 1.0
+      tp:
+        enabled: true
+        name: "ENTITY_ENDERMAN_TELEPORT"
+        volume: 0.9
+        pitch: 1.2
+
+    protection:
+      enabled: true
+      message: "{prefix}&cYou can only build inside your own tycoon."
+      sound:
+        enabled: true
+        name: "ENTITY_VILLAGER_NO"
+        volume: 1.0
+        pitch: 1.0
+
+    void-safety:
+      enabled: true
+      y-threshold: 40
+      message: "{prefix}&eYou fell off your island. Teleporting back..."
+      sound:
+        enabled: true
+        name: "ENTITY_ENDERMAN_TELEPORT"
+        volume: 0.9
+        pitch: 1.2
+
+  miner:
+    payout-interval-seconds: 1
+    coins-per-second: 0.05
+
+    starter:
+      material: "FURNACE"
+      name: "&6Starter Miner"
+      lore:
+        - "&7Place this in your tycoon."
+        - "&7Generates &e{coins}&7 {coin_name} per minute."
+      coins-per-minute: 5
+
+    block-interact:
+      message: "{prefix}&7Miner UI coming soon."
+
+    hologram:
+      enabled: true
+      format: "&a+{amount} &7{coin}"
+      duration-ticks: 12
+      y-offset: 1.25
+      nearby-radius: 24
+
+    sounds:
+      placed:
+        enabled: true
+        name: "BLOCK_NOTE_BLOCK_PLING"
+        volume: 1.0
+        pitch: 1.2
+
+      tick:
+        enabled: true
+        name: "BLOCK_NOTE_BLOCK_HAT"
+        volume: 0.6
+        pitch: 1.6
+
+      deny:
+        enabled: true
+        name: "ENTITY_VILLAGER_NO"
+        volume: 1.0
+        pitch: 1.0
+
+      removed:
+        enabled: true
+        name: "UI_BUTTON_CLICK"
+        volume: 1.0
+        pitch: 1.0

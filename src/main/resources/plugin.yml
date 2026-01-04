@@ -30,6 +30,15 @@ commands:
     description: View and handle player reports
     usage: /reports
     permission: playermessages.reports
+  trade:
+    usage: /trade <player>|accept|deny|cancel
+    description: Trade met een speler
+  coins:
+    description: View or manage your Cryptocoon coins
+    usage: /coins [add <player> <amount>]
+  tycoon:
+    description: Teleport to your tycoon
+    usage: /tycoon [info]
 
 permissions:
   playermessages.reload:
@@ -58,4 +67,8 @@ permissions:
     default: op
   playermessages.reports.ban:
     description: Mag ban gebruiken
+    default: op
+  playermessages.trade:
+    default: true
+  playermessages.coins.admin:
     default: op
