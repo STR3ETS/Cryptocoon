@@ -51,9 +51,9 @@ public class TycoonManager {
 
     // island sizing (tier-based)
     private int desiredIslandSize(UUID id) {
-        int base = plugin.getConfig().getInt("cryptocoon.tycoon.island.base-size", 30);
-        int step = plugin.getConfig().getInt("cryptocoon.tycoon.island.upgrade-step", 10);
-        int max = plugin.getConfig().getInt("cryptocoon.tycoon.island.max-size", 150);
+        int base = plugin.getConfig().getInt("cryptocoon.tycoon.island.base-size", 10);
+        int step = plugin.getConfig().getInt("cryptocoon.tycoon.island.upgrade-step", 0);
+        int max = plugin.getConfig().getInt("cryptocoon.tycoon.island.max-size", 10);
 
         int tier = store.getTier(id); // 1..n
         int size = base + ((tier - 1) * step);
@@ -134,6 +134,11 @@ public class TycoonManager {
         return new Location(w, plot.centerX() + 0.5, yBase + yOff, plot.centerZ() + 0.5, 0f, 0f);
     }
 
+    /**
+     * ✅ Zorgt dat eiland EXACT op gewenste grootte staat.
+     * - generated < desired => expand
+     * - generated > desired => shrink terug (en update store)
+     */
     public void ensureIsland(Player p) {
         ensureWorld();
 
@@ -142,7 +147,8 @@ public class TycoonManager {
         int desired = desiredIslandSize(id);
         int generated = store.getGeneratedIslandSize(id);
 
-        if (generated >= desired) return; // ✅ al groot genoeg
+        // Niks te doen
+        if (generated == desired) return;
 
         TycoonPlot plot = getOrCreatePlot(p);
         World w = Bukkit.getWorld(worldName());
@@ -151,14 +157,51 @@ public class TycoonManager {
         int y = plugin.getConfig().getInt("cryptocoon.tycoon.island.y", 100);
         int dirtLayers = Math.max(0, plugin.getConfig().getInt("cryptocoon.tycoon.island.dirt-layers", 2));
 
-        // we expanden alleen (zonder bestaande blocks te slopen)
         int cx = plot.centerX();
         int cz = plot.centerZ();
 
+        // bounds voor NEW (desired)
         int newHalf = desired / 2;
         int newStartX = cx - newHalf;
         int newStartZ = cz - newHalf;
+        int newEndX = newStartX + desired - 1;
+        int newEndZ = newStartZ + desired - 1;
 
+        // expand
+        if (generated < desired) {
+            int oldSize = Math.max(0, generated);
+            int oldHalf = oldSize / 2;
+            int oldStartX = cx - oldHalf;
+            int oldStartZ = cz - oldHalf;
+            int oldEndX = oldStartX + oldSize - 1;
+            int oldEndZ = oldStartZ + oldSize - 1;
+
+            for (int dx = 0; dx < desired; dx++) {
+                for (int dz = 0; dz < desired; dz++) {
+                    int x = newStartX + dx;
+                    int z = newStartZ + dz;
+
+                    // skip als dit al in het oude eiland zat
+                    if (oldSize > 0 && x >= oldStartX && x <= oldEndX && z >= oldStartZ && z <= oldEndZ) {
+                        continue;
+                    }
+
+                    // maak alleen nieuw gebied
+                    w.getBlockAt(x, y, z).setType(Material.GRASS_BLOCK, false);
+                    for (int i = 1; i <= dirtLayers; i++) {
+                        w.getBlockAt(x, y - i, z).setType(Material.DIRT, false);
+                    }
+
+                    w.setBiome(x, z, Biome.PLAINS);
+                }
+            }
+
+            store.setGeneratedIslandSize(id, desired);
+            store.save();
+            return;
+        }
+
+        // shrink (generated > desired)
         int oldSize = Math.max(0, generated);
         int oldHalf = oldSize / 2;
         int oldStartX = cx - oldHalf;
@@ -166,23 +209,16 @@ public class TycoonManager {
         int oldEndX = oldStartX + oldSize - 1;
         int oldEndZ = oldStartZ + oldSize - 1;
 
-        for (int dx = 0; dx < desired; dx++) {
-            for (int dz = 0; dz < desired; dz++) {
-                int x = newStartX + dx;
-                int z = newStartZ + dz;
+        for (int x = oldStartX; x <= oldEndX; x++) {
+            for (int z = oldStartZ; z <= oldEndZ; z++) {
+                // binnen nieuwe bounds? laten staan
+                if (x >= newStartX && x <= newEndX && z >= newStartZ && z <= newEndZ) continue;
 
-                // skip als dit al in het oude eiland zat
-                if (oldSize > 0 && x >= oldStartX && x <= oldEndX && z >= oldStartZ && z <= oldEndZ) {
-                    continue;
-                }
-
-                // maak alleen nieuw gebied
-                w.getBlockAt(x, y, z).setType(Material.GRASS_BLOCK, false);
+                // buiten nieuwe bounds => weg (let op: dit verwijdert ook blocks die je daar geplaatst hebt)
+                w.getBlockAt(x, y, z).setType(Material.AIR, false);
                 for (int i = 1; i <= dirtLayers; i++) {
-                    w.getBlockAt(x, y - i, z).setType(Material.DIRT, false);
+                    w.getBlockAt(x, y - i, z).setType(Material.AIR, false);
                 }
-
-                w.setBiome(x, z, Biome.PLAINS);
             }
         }
 
@@ -190,9 +226,13 @@ public class TycoonManager {
         store.save();
     }
 
-    public boolean isInside(Player p, Location loc) {
+    /**
+     * ✅ Plot check (512x512 etc).
+     */
+    public boolean isInsidePlot(Player p, Location loc) {
         if (loc == null || loc.getWorld() == null) return false;
-        if (!loc.getWorld().getName().equalsIgnoreCase(worldName())) return true; // alleen tycoon world checken
+
+        if (!loc.getWorld().getName().equalsIgnoreCase(worldName())) return true;
 
         TycoonPlot plot = getOrCreatePlot(p);
         int x = loc.getBlockX();
@@ -201,17 +241,71 @@ public class TycoonManager {
         return x >= plot.minX() && x <= plot.maxX() && z >= plot.minZ() && z <= plot.maxZ();
     }
 
+    /**
+     * ✅ Backwards compatibility (voor oude calls).
+     * Dit is dezelfde check als "plot".
+     */
+    @Deprecated
+    public boolean isInside(Player p, Location loc) {
+        return isInsidePlot(p, loc);
+    }
+
+    /**
+     * ✅ Island bounds (echte eiland, 10x10 als desired = 10).
+     */
+    public IslandBounds getIslandBounds(Player p) {
+        UUID id = p.getUniqueId();
+        TycoonPlot plot = getOrCreatePlot(p);
+
+        int desired = desiredIslandSize(id);
+        int generated = store.getGeneratedIslandSize(id);
+
+        // Gebruik altijd de grootste die echt bestaat/gaat bestaan, maar door shrink hierboven
+        // zal generated nooit meer > desired blijven als je base-size lockt op 10.
+        int size = Math.max(generated, desired);
+        if (size <= 0) size = desired;
+
+        int half = size / 2;
+        int startX = plot.centerX() - half;
+        int startZ = plot.centerZ() - half;
+        int endX = startX + size - 1;
+        int endZ = startZ + size - 1;
+
+        return new IslandBounds(startX, endX, startZ, endZ, size);
+    }
+
+    /**
+     * ✅ Echte eiland check (miners hierop limiteren).
+     */
+    public boolean isInsideIsland(Player p, Location loc) {
+        if (loc == null || loc.getWorld() == null) return false;
+        if (!loc.getWorld().getName().equalsIgnoreCase(worldName())) return false;
+
+        IslandBounds b = getIslandBounds(p);
+        int x = loc.getBlockX();
+        int z = loc.getBlockZ();
+
+        return x >= b.minX() && x <= b.maxX() && z >= b.minZ() && z <= b.maxZ();
+    }
+
     public void sendInfo(Player p) {
         TycoonPlot plot = getOrCreatePlot(p);
+        IslandBounds island = getIslandBounds(p);
 
         msg.send(p,
                 "cryptocoon.tycoon.messages.info",
-                "{prefix}&7Your tycoon: &fX {minx}-{maxx} &7| &fZ {minz}-{maxz}",
+                "{prefix}&7Plot: &fX {minx}-{maxx} &7| &fZ {minz}-{maxz}\n"
+                        + "{prefix}&7Island: &fX {ix1}-{ix2} &7| &fZ {iz1}-{iz2} &7(&f{isize}x{isize}&7)",
                 Map.of(
                         "minx", String.valueOf(plot.minX()),
                         "maxx", String.valueOf(plot.maxX()),
                         "minz", String.valueOf(plot.minZ()),
-                        "maxz", String.valueOf(plot.maxZ())
+                        "maxz", String.valueOf(plot.maxZ()),
+                        "ix1", String.valueOf(island.minX()),
+                        "ix2", String.valueOf(island.maxX()),
+                        "iz1", String.valueOf(island.minZ()),
+                        "iz2", String.valueOf(island.maxZ()),
+                        "isize", String.valueOf(island.size())
                 )
         );
     }
@@ -224,12 +318,10 @@ public class TycoonManager {
         int currentGenerated = store.getGeneratedIslandSize(id);
         int currentTier = store.getTier(id);
 
-        // probeer tier omhoog
         store.setTier(id, currentTier + 1);
         int desired = desiredIslandSize(id);
 
         if (desired <= currentGenerated) {
-            // maxed / geen groei
             store.setTier(id, currentTier);
             store.save();
             return -1;
@@ -251,7 +343,7 @@ public class TycoonManager {
         int dirtLayers = Math.max(0, plugin.getConfig().getInt("cryptocoon.tycoon.island.dirt-layers", 2));
 
         int sizeToClear = Math.max(store.getGeneratedIslandSize(id), desiredIslandSize(id));
-        if (sizeToClear <= 0) sizeToClear = plugin.getConfig().getInt("cryptocoon.tycoon.island.base-size", 30);
+        if (sizeToClear <= 0) sizeToClear = plugin.getConfig().getInt("cryptocoon.tycoon.island.base-size", 10);
 
         int cx = plot.centerX();
         int cz = plot.centerZ();
@@ -280,4 +372,5 @@ public class TycoonManager {
     }
 
     public record TycoonPlot(int index, int minX, int maxX, int minZ, int maxZ, int centerX, int centerZ) {}
+    public record IslandBounds(int minX, int maxX, int minZ, int maxZ, int size) {}
 }

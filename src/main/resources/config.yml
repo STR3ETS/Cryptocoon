@@ -362,7 +362,7 @@ trade:
 # =========================
 cryptocoon:
   coins:
-    name: "CC"
+    name: "K"
     start-balance: 0
 
   tycoon:
@@ -371,17 +371,21 @@ cryptocoon:
     origin-x: 0
     origin-z: 0
 
-    plot-size: 512      # ✅ groot bouwgebied per speler
-    gap: 49488          # ✅ 512 + 49488 = 50.000 blocks tussen plots
+    plot-size: 512
+    gap: 49488
     row-length: 10
 
     island:
-      base-size: 30       # ✅ starter eiland = 30x30
-      upgrade-step: 10    # 40, 50, 60...
-      max-size: 150       # cap
+      base-size: 10
+      upgrade-step: 0
+      max-size: 10
       y: 100
       dirt-layers: 2
       spawn-offset-y: 2
+
+    border:
+      show-distance: 2   # ✅ jij wilt particles pas zien binnen 2 blocks
+      step: 1            # ✅ 1 = strakkere rand (2 kan “gaten” geven)
 
     upgrades:
       enabled: true
@@ -392,7 +396,7 @@ cryptocoon:
 
     messages:
       claimed: "{prefix}&aTycoon claimed! &7Use &f/tycoon &7to teleport."
-      not-in-plot: "{prefix}&cYou can only place miners inside your tycoon."
+      not-in-plot: "{prefix}&cYou can only build inside your own tycoon."
       tp: "{prefix}&aTeleported to your tycoon."
       info: "{prefix}&7Your tycoon: &fX {minx}-{maxx} &7| &fZ {minz}-{maxz}"
       reset: "{prefix}&aYour island was regenerated."
@@ -440,6 +444,9 @@ cryptocoon:
         - "&7Generates &e{coins}&7 {coin_name} per minute."
       coins-per-minute: 5
 
+    limits:
+      max-per-tycoon: 10
+
     block-interact:
       message: "{prefix}&7Miner UI coming soon."
 
@@ -474,3 +481,30 @@ cryptocoon:
         name: "UI_BUTTON_CLICK"
         volume: 1.0
         pitch: 1.0
+
+  scoreboard:
+    enabled: true
+    only-in-tycoon-world: true
+    title: "&6&lCRYPTOCOON"
+    update-ticks: 20
+    datetime-format: "M/d/yy, h:mm a"
+    server-ip: "Cryptocoon.minehut.com"
+
+    coin-icon: "⛁"
+
+    player-events: 0
+    event-status: "COMING SOON"
+
+    lines:
+      - "&8⌚ &8{datetime}"
+      - "&7"
+      - "&6&lEVENTS"
+      - "&6| &fPlayer Events : &c{player_events}"
+      - "&6| &fEvent : &c{event_status}"
+      - "&7"
+      - "&6&lPLAYER"
+      - "&6| &fBalance : &e{coins}{coin} {coin_icon}"
+      - "&6| &fMiners : &a{miners}&7/&a{miners_max}"
+      - "&6| &fPlaytime : &f{playtime}"
+      - "&7"
+      - "&7{server_ip}"

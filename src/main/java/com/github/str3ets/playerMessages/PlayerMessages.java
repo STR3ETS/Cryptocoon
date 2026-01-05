@@ -3,10 +3,12 @@ package com.github.str3ets.playerMessages;
 import com.github.str3ets.playerMessages.cryptocoon.coins.CoinsCommand;
 import com.github.str3ets.playerMessages.cryptocoon.coins.CoinsStore;
 import com.github.str3ets.playerMessages.cryptocoon.miner.MinerItemFactory;
+import com.github.str3ets.playerMessages.cryptocoon.miner.MinerLimitListener;
 import com.github.str3ets.playerMessages.cryptocoon.miner.MinerListener;
 import com.github.str3ets.playerMessages.cryptocoon.miner.MinerManager;
 import com.github.str3ets.playerMessages.cryptocoon.miner.MinerStore;
 import com.github.str3ets.playerMessages.cryptocoon.player.CryptoJoinListener;
+import com.github.str3ets.playerMessages.cryptocoon.scoreboard.CryptoScoreboardManager;
 import com.github.str3ets.playerMessages.cryptocoon.tycoon.TycoonCommand;
 import com.github.str3ets.playerMessages.cryptocoon.tycoon.TycoonManager;
 import com.github.str3ets.playerMessages.cryptocoon.tycoon.TycoonProtectionListener;
@@ -42,6 +44,9 @@ public final class PlayerMessages extends JavaPlugin {
     // ✅ Tycoon
     private TycoonStore tycoonStore;
     private TycoonManager tycoonManager;
+
+    // ✅ Scoreboard
+    private CryptoScoreboardManager cryptoScoreboard;
 
     // ✅ (optioneel) future use
     private NamespacedKey tradeSessionKey;
@@ -95,11 +100,8 @@ public final class PlayerMessages extends JavaPlugin {
         // ✅ Tycoon (void world + eiland)
         tycoonStore = new TycoonStore(this);
         tycoonManager = new TycoonManager(this, messages(), tycoonStore);
-
-        // maak de void world alvast bij startup
         tycoonManager.ensureWorld();
 
-        // tycoon listeners
         getServer().getPluginManager().registerEvents(new TycoonProtectionListener(tycoonManager, messages()), this);
         getServer().getPluginManager().registerEvents(new TycoonVoidSafetyListener(tycoonManager, messages()), this);
 
@@ -130,13 +132,25 @@ public final class PlayerMessages extends JavaPlugin {
         minerStore = new MinerStore(this);
         MinerListener.MinerAccess.init(minerStore, messages());
 
+        // ✅ LIMIT LISTENER MUST BE REGISTERED (and BEFORE MinerListener in priority)
+        getServer().getPluginManager().registerEvents(
+                new MinerLimitListener(this, messages(), minerStore, minerItemFactory),
+                this
+        );
+
         minerManager = new MinerManager(this, messages(), coinsStore, minerItemFactory, minerStore, tycoonManager);
         getServer().getPluginManager().registerEvents(new MinerListener(minerManager), this);
         minerManager.start();
+
+        // ✅ Scoreboard
+        cryptoScoreboard = new CryptoScoreboardManager(this, coinsStore, minerManager);
+        getServer().getPluginManager().registerEvents(cryptoScoreboard, this);
+        cryptoScoreboard.start();
     }
 
     @Override
     public void onDisable() {
+        if (cryptoScoreboard != null) cryptoScoreboard.stop();
         if (minerManager != null) minerManager.stop();
         if (minerStore != null) minerStore.save();
         if (coinsStore != null) coinsStore.save();

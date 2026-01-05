@@ -76,14 +76,26 @@ public class MinerManager {
         return String.format(Locale.US, "%.2f", units / 100.0);
     }
 
+    /**
+     * ✅ Scoreboard/limits helper: hoeveel miners heeft deze speler geplaatst?
+     * (We tellen entries uit de store; place/remove houden dit up-to-date.)
+     */
+    public int getPlacedMiners(UUID owner) {
+        int count = 0;
+        for (MinerStore.MinerEntry e : store.all()) {
+            if (e.owner().equals(owner)) count++;
+        }
+        return count;
+    }
+
     public void handlePlace(BlockPlaceEvent e) {
         Player p = e.getPlayer();
         ItemStack hand = e.getItemInHand();
 
         if (!minerItems.isMiner(hand)) return;
 
-        // ✅ alleen in eigen tycoon
-        if (tycoon != null && !tycoon.isInside(p, e.getBlockPlaced().getLocation())) {
+        // ✅ alleen in eigen tycoon (10x10 eiland)
+        if (tycoon != null && !tycoon.isInsideIsland(p, e.getBlockPlaced().getLocation())) {
             e.setCancelled(true);
             msg.send(p, "cryptocoon.tycoon.messages.not-in-plot",
                     "{prefix}&cYou can only place miners inside your tycoon.", null);
